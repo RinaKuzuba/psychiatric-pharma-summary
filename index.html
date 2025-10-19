@@ -212,6 +212,7 @@
             gap: 15px;
             justify-content: center;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         button {
@@ -241,6 +242,17 @@
 
         .btn-skip:hover {
             background: #5a6268;
+        }
+
+        .btn-reference {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-reference:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(23, 162, 184, 0.4);
         }
 
         .btn-pause {
@@ -370,6 +382,22 @@
             font-style: italic;
             margin-top: 10px;
         }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #4a90e2;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -385,12 +413,18 @@
         <!-- スタート画面 -->
         <div id="startScreen" class="start-screen">
             <h2>薬剤管理サマリー（精神科版）</h2>
+            <div class="info-box">
+                <strong>📌 基本情報について</strong><br>
+                患者氏名、ID、入院日、退院日、性別、生年月日は<br>
+                CSVファイルで後から一括入力するため、質問をスキップします。
+            </div>
             <p>
-                これから約60項目の質問を順番に表示します。<br>
+                これから約50項目の質問を順番に表示します。<br>
                 各質問には<strong>10秒の回答時間</strong>があります。<br>
                 時間内に回答がない場合は自動的に次へ進みます。<br><br>
-                ⏱️ 所要時間：約10分<br>
-                📝 最後にCSV形式でダウンロード可能
+                ⏱️ 所要時間：約8-10分<br>
+                📝 最後にCSV形式でダウンロード可能<br>
+                📎 「別紙参照」ボタンで詳細資料の参照を記録可能
             </p>
             <button class="btn-start" onclick="startQuestionnaire()">開始する</button>
         </div>
@@ -402,7 +436,7 @@
                     <div id="progressFill" class="progress-fill" style="width: 0%"></div>
                 </div>
                 <div class="progress-text">
-                    <span id="questionNumber">質問 1 / 60</span>
+                    <span id="questionNumber">質問 1 / 50</span>
                     <span id="categoryName">基本情報</span>
                 </div>
             </div>
@@ -416,13 +450,14 @@
 
             <div class="question-container">
                 <div class="question-category" id="questionCategory">基本情報</div>
-                <div class="question-text" id="questionText">患者氏名を入力してください</div>
+                <div class="question-text" id="questionText">質問内容</div>
                 <div class="input-container" id="inputContainer">
                     <!-- 動的に入力フィールドが挿入される -->
                 </div>
                 <div class="hint-text" id="hintText"></div>
                 <div class="button-container">
                     <button class="btn-skip" onclick="skipQuestion()">スキップ</button>
+                    <button class="btn-reference" onclick="setReference()">📎 別紙参照</button>
                     <button class="btn-pause" onclick="pauseTimer()">一時停止</button>
                     <button class="btn-next" onclick="nextQuestion()">次へ</button>
                 </div>
@@ -435,11 +470,11 @@
                 <h2>✅ 入力完了</h2>
                 <p>
                     すべての質問への回答が完了しました。<br>
-                    下記のボタンからデータをダウンロードできます。
+                    下記のボタンからデータをダウンロードできます。<br>
+                    <strong>※基本情報（氏名、ID等）はCSVファイルで後から入力してください。</strong>
                 </p>
                 <div class="download-buttons">
                     <button class="btn-download" onclick="downloadCSV()">📊 CSV形式でダウンロード</button>
-                    <button class="btn-download" onclick="downloadJSON()">📄 JSON形式でダウンロード</button>
                     <button class="btn-download" onclick="downloadText()">📝 テキスト形式でダウンロード</button>
                     <button class="btn-restart" onclick="location.reload()">🔄 最初からやり直す</button>
                 </div>
@@ -457,15 +492,9 @@
     </div>
 
     <script>
-        // 質問データ
+        // 質問データ（基本情報6項目を除外）
         const questions = [
-            // 基本情報
-            { category: "基本情報", field: "patientName", question: "患者氏名を入力してください", type: "text", hint: "ふりがなも必要な場合は別途入力" },
-            { category: "基本情報", field: "patientId", question: "患者IDを入力してください", type: "text" },
-            { category: "基本情報", field: "admissionDate", question: "入院日を選択してください", type: "date" },
-            { category: "基本情報", field: "dischargeDate", question: "退院日を選択してください", type: "date" },
-            { category: "基本情報", field: "gender", question: "性別を選択してください", type: "select", options: ["男性", "女性", "その他"] },
-            { category: "基本情報", field: "birthDate", question: "生年月日を選択してください", type: "date" },
+            // 基本情報（残りの項目）
             { category: "基本情報", field: "doctor", question: "担当医の名前を入力してください", type: "text" },
             { category: "基本情報", field: "pharmacist", question: "担当薬剤師の名前を入力してください", type: "text" },
             { category: "基本情報", field: "height", question: "身長(cm)を入力してください", type: "number", hint: "例: 165" },
@@ -571,8 +600,21 @@
         let timeRemaining = 10;
         let isPaused = false;
 
+        // 基本情報フィールドの初期化（CSVで後から入力）
+        const basicFields = {
+            patientName: "※CSV入力",
+            patientId: "※CSV入力",
+            admissionDate: "※CSV入力",
+            dischargeDate: "※CSV入力",
+            gender: "※CSV入力",
+            birthDate: "※CSV入力"
+        };
+
         // 質問開始
         function startQuestionnaire() {
+            // 基本情報の初期値設定
+            Object.assign(answers, basicFields);
+            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('questionScreen').style.display = 'block';
             showQuestion(0);
@@ -736,6 +778,14 @@
             showQuestion(currentQuestionIndex + 1);
         }
 
+        // 別紙参照を設定
+        function setReference() {
+            const q = questions[currentQuestionIndex];
+            answers[q.field] = '別紙参照';
+            clearInterval(timer);
+            showQuestion(currentQuestionIndex + 1);
+        }
+
         // 現在の回答を保存
         function saveCurrentAnswer() {
             const q = questions[currentQuestionIndex];
@@ -766,8 +816,17 @@
             const headers = ['項目名', '回答'];
             const rows = [headers];
             
+            // 基本情報（CSV入力分）
+            rows.push(['患者氏名', basicFields.patientName]);
+            rows.push(['患者ID', basicFields.patientId]);
+            rows.push(['入院日', basicFields.admissionDate]);
+            rows.push(['退院日', basicFields.dischargeDate]);
+            rows.push(['性別', basicFields.gender]);
+            rows.push(['生年月日', basicFields.birthDate]);
+            
+            // その他の質問
             questions.forEach(q => {
-                const answer = answers[q.field] || '未回答';
+                const answer = answers[q.field] || '未確認';
                 rows.push([q.question, answer]);
             });
             
@@ -798,35 +857,23 @@
             URL.revokeObjectURL(url);
         }
 
-        // JSONダウンロード
-        function downloadJSON() {
-            const data = {
-                作成日時: new Date().toLocaleString('ja-JP'),
-                回答データ: answers,
-                全質問: questions.map(q => ({
-                    カテゴリ: q.category,
-                    質問: q.question,
-                    フィールド: q.field,
-                    回答: answers[q.field] || '未回答'
-                }))
-            };
-            
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
         // テキストダウンロード
         function downloadText() {
             let text = '薬剤管理サマリー（精神科版）\n';
             text += '=' + '='.repeat(50) + '\n\n';
             text += `作成日時: ${new Date().toLocaleString('ja-JP')}\n\n`;
             
+            // 基本情報
+            text += '【基本情報】※CSV入力項目\n';
+            text += '-'.repeat(40) + '\n';
+            text += `患者氏名: ${basicFields.patientName}\n`;
+            text += `患者ID: ${basicFields.patientId}\n`;
+            text += `入院日: ${basicFields.admissionDate}\n`;
+            text += `退院日: ${basicFields.dischargeDate}\n`;
+            text += `性別: ${basicFields.gender}\n`;
+            text += `生年月日: ${basicFields.birthDate}\n\n`;
+            
+            // その他の質問
             let currentCategory = '';
             questions.forEach(q => {
                 if (currentCategory !== q.category) {
@@ -835,7 +882,7 @@
                     text += '-'.repeat(40) + '\n';
                 }
                 
-                const answer = answers[q.field] || '未回答';
+                const answer = answers[q.field] || '未確認';
                 text += `${q.question}:\n  ${answer}\n\n`;
             });
             
@@ -859,7 +906,7 @@
 
         // ページ離脱時の警告
         window.addEventListener('beforeunload', function(e) {
-            if (Object.keys(answers).length > 0 && document.getElementById('completeScreen').style.display === 'none') {
+            if (Object.keys(answers).length > Object.keys(basicFields).length && document.getElementById('completeScreen').style.display === 'none') {
                 e.preventDefault();
                 e.returnValue = '入力中のデータが失われます。本当にページを離れますか？';
             }
