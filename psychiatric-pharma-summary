@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薬剤管理サマリー自動質問システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .security-notice {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .progress-container {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timer-container {
+            padding: 10px 30px;
+            background: #fff3cd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .timer-bar {
+            flex: 1;
+            background: #e9ecef;
+            height: 6px;
+            border-radius: 3px;
+            margin-left: 15px;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            background: #ffc107;
+            height: 100%;
+            border-radius: 3px;
+            transition: width 10s linear;
+        }
+
+        .timer-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #856404;
+            min-width: 40px;
+        }
+
+        .question-container {
+            padding: 40px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-category {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-skip {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-skip:hover {
+            background: #5a6268;
+        }
+
+        .btn-pause {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-pause:hover {
+            background: #e0a800;
+        }
+
+        .start-screen, .complete-screen {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .start-screen h2, .complete-screen h2 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p, .complete-screen p {
+            font-size: 16px;
+            color: #6c757d;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            font-size: 20px;
+            padding: 15px 40px;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(23, 162, 184, 0.4);
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .paused-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .paused-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .paused-modal h3 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .btn-resume {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .btn-resume:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .hint-text {
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💊 薬剤管理サマリー自動作成システム</h1>
+            <div class="security-notice">
+                🔒 <strong>完全プライベート処理</strong><br>
+                すべてのデータはブラウザ内で処理され、外部送信は一切ありません
+            </div>
+        </div>
+
+        <!-- スタート画面 -->
+        <div id="startScreen" class="start-screen">
+            <h2>薬剤管理サマリー（精神科版）</h2>
+            <p>
+                これから約60項目の質問を順番に表示します。<br>
+                各質問には<strong>10秒の回答時間</strong>があります。<br>
+                時間内に回答がない場合は自動的に次へ進みます。<br><br>
+                ⏱️ 所要時間：約10分<br>
+                📝 最後にCSV形式でダウンロード可能
+            </p>
+            <button class="btn-start" onclick="startQuestionnaire()">開始する</button>
+        </div>
+
+        <!-- 質問画面 -->
+        <div id="questionScreen" style="display: none;">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="questionNumber">質問 1 / 60</span>
+                    <span id="categoryName">基本情報</span>
+                </div>
+            </div>
+
+            <div class="timer-container">
+                <span class="timer-text" id="timerText">10</span>
+                <div class="timer-bar">
+                    <div id="timerFill" class="timer-fill" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-category" id="questionCategory">基本情報</div>
+                <div class="question-text" id="questionText">患者氏名を入力してください</div>
+                <div class="input-container" id="inputContainer">
+                    <!-- 動的に入力フィールドが挿入される -->
+                </div>
+                <div class="hint-text" id="hintText"></div>
+                <div class="button-container">
+                    <button class="btn-skip" onclick="skipQuestion()">スキップ</button>
+                    <button class="btn-pause" onclick="pauseTimer()">一時停止</button>
+                    <button class="btn-next" onclick="nextQuestion()">次へ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 完了画面 -->
+        <div id="completeScreen" style="display: none;">
+            <div class="complete-screen">
+                <h2>✅ 入力完了</h2>
+                <p>
+                    すべての質問への回答が完了しました。<br>
+                    下記のボタンからデータをダウンロードできます。
+                </p>
+                <div class="download-buttons">
+                    <button class="btn-download" onclick="downloadCSV()">📊 CSV形式でダウンロード</button>
+                    <button class="btn-download" onclick="downloadJSON()">📄 JSON形式でダウンロード</button>
+                    <button class="btn-download" onclick="downloadText()">📝 テキスト形式でダウンロード</button>
+                    <button class="btn-restart" onclick="location.reload()">🔄 最初からやり直す</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 一時停止モーダル -->
+        <div id="pausedOverlay" class="paused-overlay">
+            <div class="paused-modal">
+                <h3>⏸️ 一時停止中</h3>
+                <p>準備ができたら「再開」をクリックしてください</p>
+                <button class="btn-resume" onclick="resumeTimer()">再開する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 質問データ
+        const questions = [
+            // 基本情報
+            { category: "基本情報", field: "patientName", question: "患者氏名を入力してください", type: "text", hint: "ふりがなも必要な場合は別途入力" },
+            { category: "基本情報", field: "patientId", question: "患者IDを入力してください", type: "text" },
+            { category: "基本情報", field: "admissionDate", question: "入院日を選択してください", type: "date" },
+            { category: "基本情報", field: "dischargeDate", question: "退院日を選択してください", type: "date" },
+            { category: "基本情報", field: "gender", question: "性別を選択してください", type: "select", options: ["男性", "女性", "その他"] },
+            { category: "基本情報", field: "birthDate", question: "生年月日を選択してください", type: "date" },
+            { category: "基本情報", field: "doctor", question: "担当医の名前を入力してください", type: "text" },
+            { category: "基本情報", field: "pharmacist", question: "担当薬剤師の名前を入力してください", type: "text" },
+            { category: "基本情報", field: "height", question: "身長(cm)を入力してください", type: "number", hint: "例: 165" },
+            { category: "基本情報", field: "weight", question: "体重(kg)を入力してください", type: "number", hint: "例: 60" },
+            { category: "基本情報", field: "smoking", question: "喫煙歴はありますか？", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
+            { category: "基本情報", field: "drinking", question: "飲酒歴はありますか？", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
+            
+            // 病歴情報
+            { category: "病歴情報", field: "mainDiagnosis", question: "主病名を入力してください", type: "text" },
+            { category: "病歴情報", field: "medicalHistory", question: "既往歴を入力してください", type: "textarea", hint: "複数ある場合は改行で区切って入力" },
+            { category: "病歴情報", field: "admissionReason", question: "入院理由を選択してください", type: "select", options: ["病状悪化", "怠薬による病状悪化", "通院中断による病状悪化", "副作用", "初発", "その他"] },
+            { category: "病歴情報", field: "admissionReasonOther", question: "その他の入院理由（該当する場合）", type: "text", hint: "前問で「その他」を選択した場合に入力" },
+            
+            // アレルギー・副作用歴
+            { category: "アレルギー情報", field: "allergyHistory", question: "アレルギー歴はありますか？", type: "select", options: ["なし", "あり", "疑い"] },
+            { category: "アレルギー情報", field: "allergyDetails", question: "アレルギーの詳細（ある場合）", type: "text", hint: "薬剤名や症状を入力" },
+            { category: "アレルギー情報", field: "sideEffectHistory", question: "副作用歴はありますか？", type: "select", options: ["なし", "あり", "疑い"] },
+            { category: "アレルギー情報", field: "sideEffectDetails", question: "副作用の詳細（ある場合）", type: "text", hint: "薬剤名や症状を入力" },
+            
+            // 服薬管理情報
+            { category: "服薬管理", field: "priorMedicationManager", question: "入院前の服薬管理者", type: "select", options: ["本人管理", "家族管理", "その他"] },
+            { category: "服薬管理", field: "priorManagementMethod", question: "入院前の管理方法", type: "select", options: ["そのまま", "カレンダー", "ボックス", "ファイル", "その他"] },
+            { category: "服薬管理", field: "postMedicationManager", question: "退院後の服薬管理者", type: "select", options: ["本人", "家族", "医療従事者", "その他"] },
+            { category: "服薬管理", field: "dischargeDestination", question: "退院先", type: "select", options: ["当院", "他院", "自宅", "施設"] },
+            
+            // 入院時持参薬
+            { category: "持参薬", field: "broughtMedications", question: "入院時持参薬はありましたか？", type: "select", options: ["あり", "なし"] },
+            { category: "持参薬", field: "prescribingInstitution", question: "処方医療機関", type: "text", hint: "持参薬がある場合" },
+            { category: "持参薬", field: "medicationInfoSource", question: "薬剤情報の確認方法", type: "checkbox", options: ["お薬手帳", "手帳アプリ", "マイナ保険証", "紹介状", "薬情"] },
+            { category: "持参薬", field: "prescriptionDetails", question: "処方薬の詳細", type: "textarea", hint: "薬剤名、用法用量など" },
+            
+            // 服薬状況
+            { category: "服薬状況", field: "priorAdherence", question: "入院前の服薬状況", type: "select", options: ["良好", "飲み忘れ", "拒薬傾向", "その他"] },
+            { category: "服薬状況", field: "hospitalAdherence", question: "入院中の服薬状況", type: "select", options: ["良好", "飲み忘れ", "拒薬傾向", "その他"] },
+            { category: "服薬状況", field: "administrationRoute", question: "薬剤投与方法", type: "select", options: ["経口（普通錠）", "経口（粉砕）", "経管（粉砕）", "経管（簡易懸濁法）"] },
+            { category: "服薬状況", field: "dispensingMethod", question: "入院中の調剤方法", type: "select", options: ["日付あり一包化", "日付なし一包化", "その他"] },
+            
+            // 服薬アドヒアランス
+            { category: "アドヒアランス", field: "refusalReason", question: "拒薬・怠薬の理由", type: "checkbox", options: [
+                "毎日薬を飲むのが面倒",
+                "薬を飲むタイミングが難しい",
+                "人前で薬を飲むことに抵抗",
+                "家族の服薬確認に抵抗",
+                "薬の量を自分で調節",
+                "薬を飲む量が多い",
+                "薬を飲む回数が多い",
+                "飲み間違えてしまう",
+                "副作用がある",
+                "効果を感じない",
+                "再発しないと思う",
+                "活動を控える必要",
+                "病気の認識不足"
+            ]},
+            { category: "アドヒアランス", field: "sideEffectTypes", question: "経験した副作用", type: "checkbox", options: [
+                "喉の渇き",
+                "眠気",
+                "便秘",
+                "頭がぼーっとする",
+                "手の震え",
+                "体重増加",
+                "生理不順",
+                "その他"
+            ]},
+            
+            // 精神科薬剤
+            { category: "精神科薬剤", field: "medicationChanges", question: "薬剤変更はありましたか？", type: "select", options: ["あり", "なし"] },
+            { category: "精神科薬剤", field: "changeType1", question: "変更内容1", type: "select", options: ["開始", "増量", "減量", "中止", "変更", "なし"] },
+            { category: "精神科薬剤", field: "changeDrug1", question: "変更薬剤名1", type: "text", hint: "変更があった場合" },
+            { category: "精神科薬剤", field: "changeReason1", question: "変更理由1", type: "select", options: ["効果不十分", "副作用", "患者希望", "拒薬", "その他"] },
+            { category: "精神科薬剤", field: "sustainedInjection", question: "持効性注射剤の使用", type: "select", options: ["あり", "なし"] },
+            { category: "精神科薬剤", field: "injectionDetails", question: "持効性注射剤の詳細", type: "text", hint: "薬剤名、用量、最終投与日など" },
+            
+            // DIEPSS評価
+            { category: "DIEPSS評価", field: "diepssGait", question: "DIEPSS評価：歩行", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssBradykinesia", question: "DIEPSS評価：動作緩慢", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssSialorrhea", question: "DIEPSS評価：流涎", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssRigidity", question: "DIEPSS評価：筋強剛", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssTremor", question: "DIEPSS評価：振戦", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssAkathisia", question: "DIEPSS評価：アカシジア", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssDystonia", question: "DIEPSS評価：ジストニア", type: "select", options: ["0", "1", "2", "3", "4"] },
+            { category: "DIEPSS評価", field: "diepssDyskinesia", question: "DIEPSS評価：ジスキネジア", type: "select", options: ["0", "1", "2", "3", "4"] },
+            
+            // 検査値
+            { category: "検査値", field: "ast", question: "AST値 (IU/L)", type: "number", hint: "最新の検査値" },
+            { category: "検査値", field: "alt", question: "ALT値 (IU/L)", type: "number", hint: "最新の検査値" },
+            { category: "検査値", field: "ggt", question: "γ-GTP値 (IU/L)", type: "number", hint: "最新の検査値" },
+            { category: "検査値", field: "scr", question: "SCr値 (mg/dl)", type: "number", hint: "最新の検査値" },
+            { category: "検査値", field: "egfr", question: "eGFR値 (mL/min/1.73m2)", type: "number", hint: "最新の検査値" },
+            { category: "検査値", field: "regularTestDrugs", question: "定期検査が必要な薬剤", type: "text", hint: "薬剤名と最終検査日" },
+            
+            // 経過・申し送り
+            { category: "経過・申し送り", field: "treatmentProgress", question: "入院中の薬物治療経過", type: "textarea", hint: "重要な経過を記入" },
+            { category: "経過・申し送り", field: "patientProblems", question: "患者の問題点", type: "textarea", hint: "服薬に関する問題など" },
+            { category: "経過・申し送り", field: "interventions", question: "服薬指導・介入の要点", type: "textarea" },
+            { category: "経過・申し送り", field: "postDischargeProblems", question: "退院後の問題点", type: "textarea" },
+            { category: "経過・申し送り", field: "handoverNotes", question: "他医療機関への申し送り事項", type: "textarea", hint: "重要な注意事項など" }
+        ];
+
+        // グローバル変数
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let timer = null;
+        let timeRemaining = 10;
+        let isPaused = false;
+
+        // 質問開始
+        function startQuestionnaire() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('questionScreen').style.display = 'block';
+            showQuestion(0);
+        }
+
+        // 質問表示
+        function showQuestion(index) {
+            if (index >= questions.length) {
+                completeQuestionnaire();
+                return;
+            }
+
+            const q = questions[index];
+            currentQuestionIndex = index;
+
+            // 進捗更新
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('questionNumber').textContent = `質問 ${index + 1} / ${questions.length}`;
+            document.getElementById('categoryName').textContent = q.category;
+            
+            // 質問表示
+            document.getElementById('questionCategory').textContent = q.category;
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('hintText').textContent = q.hint || '';
+
+            // 入力フィールド生成
+            const inputContainer = document.getElementById('inputContainer');
+            inputContainer.innerHTML = '';
+
+            if (q.type === 'text' || q.type === 'number' || q.type === 'date') {
+                const input = document.createElement('input');
+                input.type = q.type;
+                input.id = 'currentInput';
+                input.value = answers[q.field] || '';
+                inputContainer.appendChild(input);
+                setTimeout(() => input.focus(), 100);
+            } else if (q.type === 'textarea') {
+                const textarea = document.createElement('textarea');
+                textarea.id = 'currentInput';
+                textarea.value = answers[q.field] || '';
+                inputContainer.appendChild(textarea);
+                setTimeout(() => textarea.focus(), 100);
+            } else if (q.type === 'select') {
+                const select = document.createElement('select');
+                select.id = 'currentInput';
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '選択してください';
+                select.appendChild(defaultOption);
+                
+                q.options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (answers[q.field] === opt) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                
+                inputContainer.appendChild(select);
+                setTimeout(() => select.focus(), 100);
+            } else if (q.type === 'checkbox') {
+                const checkboxGroup = document.createElement('div');
+                checkboxGroup.className = 'checkbox-group';
+                
+                const currentValues = answers[q.field] ? answers[q.field].split(',') : [];
+                
+                q.options.forEach((opt, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'checkbox-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `checkbox_${i}`;
+                    checkbox.value = opt;
+                    checkbox.checked = currentValues.includes(opt);
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `checkbox_${i}`;
+                    label.textContent = opt;
+                    
+                    item.appendChild(checkbox);
+                    item.appendChild(label);
+                    checkboxGroup.appendChild(item);
+                });
+                
+                inputContainer.appendChild(checkboxGroup);
+            }
+
+            // タイマー開始
+            startTimer();
+        }
+
+        // タイマー開始
+        function startTimer() {
+            timeRemaining = 10;
+            isPaused = false;
+            updateTimerDisplay();
+            
+            if (timer) clearInterval(timer);
+            
+            timer = setInterval(() => {
+                if (!isPaused) {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                    
+                    if (timeRemaining <= 0) {
+                        clearInterval(timer);
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        // タイマー表示更新
+        function updateTimerDisplay() {
+            document.getElementById('timerText').textContent = timeRemaining;
+            const percentage = (timeRemaining / 10) * 100;
+            document.getElementById('timerFill').style.width = percentage + '%';
+            document.getElementById('timerFill').style.transition = isPaused ? 'none' : 'width 1s linear';
+        }
+
+        // 一時停止
+        function pauseTimer() {
+            isPaused = true;
+            clearInterval(timer);
+            document.getElementById('pausedOverlay').style.display = 'flex';
+        }
+
+        // 再開
+        function resumeTimer() {
+            document.getElementById('pausedOverlay').style.display = 'none';
+            isPaused = false;
+            
+            timer = setInterval(() => {
+                if (!isPaused) {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                    
+                    if (timeRemaining <= 0) {
+                        clearInterval(timer);
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        // 次の質問へ
+        function nextQuestion() {
+            saveCurrentAnswer();
+            clearInterval(timer);
+            showQuestion(currentQuestionIndex + 1);
+        }
+
+        // スキップ
+        function skipQuestion() {
+            clearInterval(timer);
+            showQuestion(currentQuestionIndex + 1);
+        }
+
+        // 現在の回答を保存
+        function saveCurrentAnswer() {
+            const q = questions[currentQuestionIndex];
+            
+            if (q.type === 'checkbox') {
+                const checkboxes = document.querySelectorAll('#inputContainer input[type="checkbox"]:checked');
+                const values = Array.from(checkboxes).map(cb => cb.value);
+                if (values.length > 0) {
+                    answers[q.field] = values.join(',');
+                }
+            } else {
+                const input = document.getElementById('currentInput');
+                if (input && input.value) {
+                    answers[q.field] = input.value;
+                }
+            }
+        }
+
+        // 完了処理
+        function completeQuestionnaire() {
+            clearInterval(timer);
+            document.getElementById('questionScreen').style.display = 'none';
+            document.getElementById('completeScreen').style.display = 'block';
+        }
+
+        // CSV作成
+        function generateCSV() {
+            const headers = ['項目名', '回答'];
+            const rows = [headers];
+            
+            questions.forEach(q => {
+                const answer = answers[q.field] || '未回答';
+                rows.push([q.question, answer]);
+            });
+            
+            // 日本語対応のためBOM付きUTF-8
+            const BOM = '\uFEFF';
+            const csvContent = BOM + rows.map(row => 
+                row.map(cell => {
+                    // セル内に改行、カンマ、ダブルクォートが含まれる場合の処理
+                    if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))) {
+                        return '"' + cell.replace(/"/g, '""') + '"';
+                    }
+                    return cell;
+                }).join(',')
+            ).join('\n');
+            
+            return csvContent;
+        }
+
+        // CSVダウンロード
+        function downloadCSV() {
+            const csv = generateCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // JSONダウンロード
+        function downloadJSON() {
+            const data = {
+                作成日時: new Date().toLocaleString('ja-JP'),
+                回答データ: answers,
+                全質問: questions.map(q => ({
+                    カテゴリ: q.category,
+                    質問: q.question,
+                    フィールド: q.field,
+                    回答: answers[q.field] || '未回答'
+                }))
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // テキストダウンロード
+        function downloadText() {
+            let text = '薬剤管理サマリー（精神科版）\n';
+            text += '=' + '='.repeat(50) + '\n\n';
+            text += `作成日時: ${new Date().toLocaleString('ja-JP')}\n\n`;
+            
+            let currentCategory = '';
+            questions.forEach(q => {
+                if (currentCategory !== q.category) {
+                    currentCategory = q.category;
+                    text += '\n【' + currentCategory + '】\n';
+                    text += '-'.repeat(40) + '\n';
+                }
+                
+                const answer = answers[q.field] || '未回答';
+                text += `${q.question}:\n  ${answer}\n\n`;
+            });
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Enterキーで次へ
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('questionScreen').style.display !== 'none') {
+                if (!isPaused) {
+                    nextQuestion();
+                }
+            }
+        });
+
+        // ページ離脱時の警告
+        window.addEventListener('beforeunload', function(e) {
+            if (Object.keys(answers).length > 0 && document.getElementById('completeScreen').style.display === 'none') {
+                e.preventDefault();
+                e.returnValue = '入力中のデータが失われます。本当にページを離れますか？';
+            }
+        });
+    </script>
