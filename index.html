@@ -3,38 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>薬剤管理サマリー自動質問システム</title>
+    <title>薬剤管理サマリー自動作成システム</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=Bebas+Neue&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #5B2C6F;
+            --secondary: #E74C3C;
+            --accent: #F39C12;
+            --dark: #17202A;
+            --light: #FDFEFE;
+            --gray: #95A5A6;
+            --success: #27AE60;
+            --warning: #F1C40F;
+            --danger: #E74C3C;
+            --gradient-1: linear-gradient(135deg, #5B2C6F 0%, #8E44AD 50%, #E74C3C 100%);
+            --gradient-2: linear-gradient(135deg, #1A5276 0%, #2980B9 50%, #5DADE2 100%);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.20);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --radius-lg: 24px;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(91, 44, 111, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--radius-lg);
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 40px 120px rgba(91, 44, 111, 0.3);
             overflow: hidden;
-            animation: slideIn 0.5s ease-out;
+            animation: slideInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(20px);
         }
 
-        @keyframes slideIn {
+        @keyframes slideInScale {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .emoji {
+            font-size: 48px;
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .security-notice {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 25px;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -42,111 +158,164 @@
             }
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .security-notice {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
         .progress-container {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            padding: 25px 40px;
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            border-bottom: 1px solid #DEE2E6;
+            position: relative;
         }
 
         .progress-bar {
-            background: #e9ecef;
-            height: 8px;
-            border-radius: 4px;
+            background: #E9ECEF;
+            height: 10px;
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .progress-fill {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: var(--gradient-1);
             height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
+            border-radius: 20px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .progress-text {
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 14px;
-            color: #6c757d;
+            color: var(--gray);
             display: flex;
             justify-content: space-between;
+            font-weight: 500;
         }
 
         .timer-container {
-            padding: 10px 30px;
-            background: #fff3cd;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #FFF3CD 0%, #FFE9A0 100%);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            border-bottom: 2px solid #FFC107;
         }
 
         .timer-bar {
             flex: 1;
-            background: #e9ecef;
-            height: 6px;
-            border-radius: 3px;
-            margin-left: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            height: 8px;
+            border-radius: 20px;
+            margin-left: 20px;
             overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .timer-fill {
-            background: #ffc107;
+            background: linear-gradient(90deg, #FF6B6B, #FFC107);
             height: 100%;
-            border-radius: 3px;
-            transition: width 10s linear;
+            border-radius: 20px;
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
         }
 
         .timer-text {
-            font-size: 18px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
             font-weight: bold;
             color: #856404;
-            min-width: 40px;
+            min-width: 50px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .question-container {
-            padding: 40px;
-            min-height: 400px;
+            padding: 50px;
+            min-height: 450px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            background: 
+                radial-gradient(ellipse at top left, rgba(91, 44, 111, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
         }
 
         .question-category {
-            color: #667eea;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            opacity: 0;
+            animation: fadeInLeft 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .question-text {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 30px;
-            line-height: 1.5;
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 35px;
+            line-height: 1.6;
+            font-weight: 600;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.1s forwards;
+        }
+
+        .change-indicator {
+            display: inline-block;
+            background: var(--warning);
+            color: var(--dark);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .input-container {
-            margin-top: 20px;
+            margin-top: 25px;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.2s forwards;
         }
 
         input[type="text"],
@@ -155,143 +324,218 @@
         select,
         textarea {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
+            padding: 18px;
+            border: 2px solid #E9ECEF;
+            border-radius: var(--radius-sm);
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
         input:focus,
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(91, 44, 111, 0.1);
+            transform: translateY(-2px);
         }
 
         textarea {
-            min-height: 120px;
+            min-height: 140px;
             resize: vertical;
             font-family: inherit;
         }
 
         .checkbox-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .checkbox-item {
             display: flex;
             align-items: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            transition: background 0.3s;
+            padding: 15px;
+            background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
+            border: 2px solid #E9ECEF;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .checkbox-item:hover {
-            background: #e9ecef;
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #FFFFFF 0%, #F3E5F5 100%);
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
         }
 
         .checkbox-item input[type="checkbox"] {
-            margin-right: 10px;
-            width: 20px;
-            height: 20px;
+            margin-right: 12px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
+            accent-color: var(--primary);
         }
 
         .checkbox-item label {
             cursor: pointer;
             flex: 1;
+            font-size: 15px;
+            color: var(--dark);
         }
 
         .button-container {
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin-top: 30px;
+            margin-top: 40px;
             flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.3s forwards;
         }
 
         button {
-            padding: 12px 30px;
+            padding: 14px 32px;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-next {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: var(--gradient-1);
             color: white;
+            box-shadow: 0 4px 15px rgba(91, 44, 111, 0.3);
         }
 
         .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(91, 44, 111, 0.4);
         }
 
         .btn-skip {
-            background: #6c757d;
+            background: linear-gradient(135deg, #6C757D 0%, #495057 100%);
             color: white;
         }
 
         .btn-skip:hover {
-            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
         }
 
         .btn-reference {
-            background: #17a2b8;
+            background: linear-gradient(135deg, #17A2B8 0%, #138496 100%);
             color: white;
         }
 
         .btn-reference:hover {
-            background: #138496;
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(23, 162, 184, 0.4);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
         }
 
         .btn-pause {
-            background: #ffc107;
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
             color: #333;
         }
 
         .btn-pause:hover {
-            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
         }
 
         .start-screen, .complete-screen {
-            padding: 60px 40px;
+            padding: 60px 50px;
             text-align: center;
+            background: 
+                radial-gradient(ellipse at center top, rgba(91, 44, 111, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at center bottom, rgba(52, 152, 219, 0.03) 0%, transparent 50%);
         }
 
         .start-screen h2, .complete-screen h2 {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 20px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            color: var(--dark);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .start-screen h2::after, .complete-screen h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient-1);
+            border-radius: 2px;
         }
 
         .start-screen p, .complete-screen p {
             font-size: 16px;
-            color: #6c757d;
+            color: #6C757D;
             line-height: 1.8;
-            margin-bottom: 30px;
+            margin: 30px auto;
+            max-width: 600px;
         }
 
         .btn-start {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
             color: white;
-            font-size: 20px;
-            padding: 15px 40px;
+            font-size: 18px;
+            padding: 18px 50px;
+            margin-top: 20px;
+            box-shadow: 0 6px 30px rgba(39, 174, 96, 0.3);
+            transform: scale(1);
         }
 
         .btn-start:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 8px 40px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+            color: white;
+            font-size: 16px;
+            padding: 14px 40px;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(52, 152, 219, 0.4);
         }
 
         .download-buttons {
@@ -299,26 +543,39 @@
             gap: 20px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-top: 30px;
         }
 
-        .btn-download {
-            background: linear-gradient(135deg, #17a2b8, #138496);
+        .btn-download, .btn-upload {
+            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
 
-        .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(23, 162, 184, 0.4);
+        .btn-upload {
+            background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .btn-download:hover, .btn-upload:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-upload:hover {
+            box-shadow: 0 6px 25px rgba(155, 89, 182, 0.4);
         }
 
         .btn-restart {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
             color: white;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
 
         .btn-restart:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
         }
 
         .paused-overlay {
@@ -327,7 +584,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -336,22 +594,17 @@
 
         .paused-modal {
             background: white;
-            padding: 40px;
-            border-radius: 20px;
+            padding: 50px;
+            border-radius: var(--radius-lg);
             text-align: center;
-            animation: bounceIn 0.5s;
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        @keyframes bounceIn {
+        @keyframes scaleIn {
             0% {
-                transform: scale(0.3);
+                transform: scale(0.5);
                 opacity: 0;
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            70% {
-                transform: scale(0.9);
             }
             100% {
                 transform: scale(1);
@@ -360,76 +613,289 @@
         }
 
         .paused-modal h3 {
-            font-size: 28px;
-            color: #333;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--dark);
             margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .paused-modal .pause-emoji {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+            animation: pulse 2s ease-in-out infinite;
         }
 
         .btn-resume {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
             color: white;
-            margin-top: 20px;
+            margin-top: 25px;
+            padding: 16px 40px;
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
         }
 
         .btn-resume:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 30px rgba(39, 174, 96, 0.4);
         }
 
         .hint-text {
             font-size: 14px;
-            color: #6c757d;
+            color: var(--gray);
             font-style: italic;
-            margin-top: 10px;
+            margin-top: 12px;
+            opacity: 0.8;
         }
 
         .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #4a90e2;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
         }
 
-        .warning-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+        .info-box::before {
+            content: '📌';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            opacity: 0.5;
+        }
+
+        .info-box strong {
+            color: #1565C0;
+            display: block;
+            margin-bottom: 10px;
+            padding-left: 35px;
+        }
+
+        .result-info {
+            font-size: 17px;
+            margin-bottom: 25px;
+            color: var(--dark);
+            padding: 20px;
+            background: linear-gradient(135deg, #F0F0F0 0%, #FAFAFA 100%);
+            border-radius: var(--radius-sm);
+            border: 1px solid #E0E0E0;
+        }
+
+        .result-info strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .patient-info-display {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .patient-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .patient-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .patient-info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .patient-info-value {
+            color: #212529;
+        }
+
+        .patient-selector {
+            margin: 20px 0;
+        }
+
+        .patient-option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .patient-option:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateX(5px);
+        }
+
+        .patient-option.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #F3E5F5 0%, #FFFFFF 100%);
+        }
+
+        .change-summary {
+            background: #fff9e6;
+            border: 2px solid #ffeb99;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .change-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ffe680;
+        }
+
+        .change-item:last-child {
+            border-bottom: none;
+        }
+
+        .change-field {
+            font-weight: 600;
+            color: #856404;
+        }
+
+        .change-values {
+            text-align: right;
+        }
+
+        .old-value {
+            color: #dc3545;
+            text-decoration: line-through;
+        }
+
+        .new-value {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e9ecef, transparent);
+            margin: 30px 0;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .container {
+                border-radius: var(--radius);
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .question-text {
+                font-size: 22px;
+            }
+            
+            .question-container {
+                padding: 30px;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            button {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            
+            .start-screen h2, .complete-screen h2 {
+                font-size: 32px;
+            }
+        }
+
+        /* アニメーション最適化 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>💊 薬剤管理サマリー自動作成システム</h1>
+            <h1><span class="emoji">💊</span> 薬剤管理サマリー自動作成システム</h1>
             <div class="security-notice">
                 🔒 <strong>完全プライベート処理</strong><br>
                 すべてのデータはブラウザ内で処理され、外部送信は一切ありません
             </div>
         </div>
 
-        <!-- スタート画面 -->
         <div id="startScreen" class="start-screen">
             <h2>薬剤管理サマリー（精神科版）</h2>
-            <div class="info-box">
-                <strong>📌 基本情報について</strong><br>
-                患者氏名、ID、入院日、退院日、性別、生年月日は<br>
-                CSVファイルで後から一括入力するため、質問をスキップします。
+            
+            <div id="initialSection">
+                <div class="info-box">
+                    <strong>データ管理方法を選択</strong>
+                    既存のCSVファイルがある場合は読み込み、<br>
+                    ない場合は新規作成できます。
+                </div>
+                
+                <p style="margin-bottom: 30px;">
+                    患者データの管理方法を選択してください
+                </p>
+                
+                <input type="file" id="csvInitialUpload" accept=".csv" style="display: none;" onchange="handleInitialFileUpload(event)">
+                
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn-upload" onclick="document.getElementById('csvInitialUpload').click()" style="padding: 18px 40px;">
+                        📂 CSVファイルを読み込む
+                    </button>
+                    
+                    <button class="btn-new" onclick="startNewEntry()" style="padding: 18px 40px;">
+                        ✨ 新規作成
+                    </button>
+                </div>
             </div>
-            <p>
-                これから約50項目の質問を順番に表示します。<br>
-                各質問には<strong>10秒の回答時間</strong>があります。<br>
-                時間内に回答がない場合は自動的に次へ進みます。<br><br>
-                ⏱️ 所要時間：約8-10分<br>
-                📝 最後にCSV形式でダウンロード可能<br>
-                📎 「別紙参照」ボタンで詳細資料の参照を記録可能
-            </p>
-            <button class="btn-start" onclick="startQuestionnaire()">開始する</button>
+            
+            <div id="patientSelectionSection" style="display: none;">
+                <h3 style="font-size: 28px; margin: 30px 0 20px; color: #333;">患者情報の確認</h3>
+                
+                <div id="patientsList">
+                    <!-- 複数患者がいる場合はここにリスト表示 -->
+                </div>
+                
+                <div id="selectedPatientInfo" class="patient-info-display">
+                    <!-- 選択された患者情報をここに表示 -->
+                </div>
+                
+                <div class="info-box" style="margin: 25px 0;">
+                    <strong>⏱️ 質問形式について</strong>
+                    これから約50項目の質問を順番に表示します。<br>
+                    各質問には<strong>30秒の回答時間</strong>があります。<br>
+                    既存データがある項目は自動入力されます。
+                </div>
+                
+                <button class="btn-start" onclick="startQuestionnaire()">
+                    この患者データで編集開始
+                </button>
+                
+                <button class="btn-restart" onclick="resetToInitial()" style="margin-top: 15px; padding: 12px 30px;">
+                    最初に戻る
+                </button>
+            </div>
         </div>
 
-        <!-- 質問画面 -->
         <div id="questionScreen" style="display: none;">
             <div class="progress-container">
                 <div class="progress-bar">
@@ -442,7 +908,7 @@
             </div>
 
             <div class="timer-container">
-                <span class="timer-text" id="timerText">10</span>
+                <span class="timer-text" id="timerText">30</span>
                 <div class="timer-bar">
                     <div id="timerFill" class="timer-fill" style="width: 100%"></div>
                 </div>
@@ -450,41 +916,60 @@
 
             <div class="question-container">
                 <div class="question-category" id="questionCategory">基本情報</div>
-                <div class="question-text" id="questionText">質問内容</div>
-                <div class="input-container" id="inputContainer">
-                    <!-- 動的に入力フィールドが挿入される -->
+                <div class="question-text">
+                    <span id="questionText">質問内容</span>
+                    <span id="changeIndicator" class="change-indicator" style="display: none;">変更あり</span>
                 </div>
+                <div class="input-container" id="inputContainer"></div>
                 <div class="hint-text" id="hintText"></div>
                 <div class="button-container">
                     <button class="btn-skip" onclick="skipQuestion()">スキップ</button>
                     <button class="btn-reference" onclick="setReference()">📎 別紙参照</button>
                     <button class="btn-pause" onclick="pauseTimer()">一時停止</button>
-                    <button class="btn-next" onclick="nextQuestion()">次へ</button>
+                    <button class="btn-next" onclick="nextQuestion()">次へ →</button>
                 </div>
             </div>
         </div>
 
-        <!-- 完了画面 -->
         <div id="completeScreen" style="display: none;">
             <div class="complete-screen">
                 <h2>✅ 入力完了</h2>
+                
+                <div class="result-info" id="resultInfo">
+                    <!-- 患者情報サマリーをここに表示 -->
+                </div>
+                
+                <div class="change-summary" id="changeSummary">
+                    <h4 style="color: #856404; margin-bottom: 15px;">📝 変更された項目</h4>
+                    <div id="changesList">
+                        <!-- 変更リストをここに表示 -->
+                    </div>
+                </div>
+                
                 <p>
                     すべての質問への回答が完了しました。<br>
-                    下記のボタンからデータをダウンロードできます。<br>
-                    <strong>※基本情報（氏名、ID等）はCSVファイルで後から入力してください。</strong>
+                    変更内容を確認して、データをダウンロードしてください。
                 </p>
+                
                 <div class="download-buttons">
-                    <button class="btn-download" onclick="downloadCSV()">📊 CSV形式でダウンロード</button>
-                    <button class="btn-download" onclick="downloadText()">📝 テキスト形式でダウンロード</button>
-                    <button class="btn-restart" onclick="location.reload()">🔄 最初からやり直す</button>
+                    <button class="btn-download" onclick="downloadCSV()">
+                        📊 CSV形式でダウンロード
+                    </button>
+                    <button class="btn-download" onclick="downloadText()">
+                        📝 テキスト形式でダウンロード
+                    </button>
                 </div>
+                
+                <button class="btn-restart" onclick="location.reload()">
+                    🔄 最初からやり直す
+                </button>
             </div>
         </div>
 
-        <!-- 一時停止モーダル -->
         <div id="pausedOverlay" class="paused-overlay">
             <div class="paused-modal">
-                <h3>⏸️ 一時停止中</h3>
+                <span class="pause-emoji">⏸️</span>
+                <h3>一時停止中</h3>
                 <p>準備ができたら「再開」をクリックしてください</p>
                 <button class="btn-resume" onclick="resumeTimer()">再開する</button>
             </div>
@@ -492,27 +977,36 @@
     </div>
 
     <script>
-        // 質問データ（基本情報6項目を除外）
-        const questions = [
-            // 基本情報（残りの項目）
-            { category: "基本情報", field: "doctor", question: "担当医の名前を入力してください", type: "text" },
-            { category: "基本情報", field: "pharmacist", question: "担当薬剤師の名前を入力してください", type: "text" },
-            { category: "基本情報", field: "height", question: "身長(cm)を入力してください", type: "number", hint: "例: 165" },
-            { category: "基本情報", field: "weight", question: "体重(kg)を入力してください", type: "number", hint: "例: 60" },
-            { category: "基本情報", field: "smoking", question: "喫煙歴はありますか？", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
-            { category: "基本情報", field: "drinking", question: "飲酒歴はありますか？", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
+        // グローバル設定
+        const TIMER_SECONDS = 30;
+        
+        // 全質問データ（基本情報を含む）
+        const allQuestions = [
+            // 基本情報
+            { category: "基本情報", field: "patientName", question: "患者氏名", type: "text" },
+            { category: "基本情報", field: "patientId", question: "患者ID", type: "text" },
+            { category: "基本情報", field: "admissionDate", question: "入院日", type: "date" },
+            { category: "基本情報", field: "dischargeDate", question: "退院日", type: "date" },
+            { category: "基本情報", field: "gender", question: "性別", type: "select", options: ["男性", "女性", "その他"] },
+            { category: "基本情報", field: "birthDate", question: "生年月日", type: "date" },
+            { category: "基本情報", field: "doctor", question: "担当医", type: "text" },
+            { category: "基本情報", field: "pharmacist", question: "担当薬剤師", type: "text" },
+            { category: "基本情報", field: "height", question: "身長(cm)", type: "number", hint: "例: 165" },
+            { category: "基本情報", field: "weight", question: "体重(kg)", type: "number", hint: "例: 60" },
+            { category: "基本情報", field: "smoking", question: "喫煙歴", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
+            { category: "基本情報", field: "drinking", question: "飲酒歴", type: "select", options: ["なし", "あり（現在）", "あり（過去）"] },
             
             // 病歴情報
-            { category: "病歴情報", field: "mainDiagnosis", question: "主病名を入力してください", type: "text" },
-            { category: "病歴情報", field: "medicalHistory", question: "既往歴を入力してください", type: "textarea", hint: "複数ある場合は改行で区切って入力" },
-            { category: "病歴情報", field: "admissionReason", question: "入院理由を選択してください", type: "select", options: ["病状悪化", "怠薬による病状悪化", "通院中断による病状悪化", "副作用", "初発", "その他"] },
-            { category: "病歴情報", field: "admissionReasonOther", question: "その他の入院理由（該当する場合）", type: "text", hint: "前問で「その他」を選択した場合に入力" },
+            { category: "病歴情報", field: "mainDiagnosis", question: "主病名", type: "text" },
+            { category: "病歴情報", field: "medicalHistory", question: "既往歴", type: "textarea", hint: "複数ある場合は改行で区切って入力" },
+            { category: "病歴情報", field: "admissionReason", question: "入院理由", type: "select", options: ["病状悪化", "怠薬による病状悪化", "通院中断による病状悪化", "副作用", "初発", "その他"] },
+            { category: "病歴情報", field: "admissionReasonOther", question: "その他の入院理由", type: "text", hint: "前問で「その他」を選択した場合に入力" },
             
             // アレルギー・副作用歴
-            { category: "アレルギー情報", field: "allergyHistory", question: "アレルギー歴はありますか？", type: "select", options: ["なし", "あり", "疑い"] },
-            { category: "アレルギー情報", field: "allergyDetails", question: "アレルギーの詳細（ある場合）", type: "text", hint: "薬剤名や症状を入力" },
-            { category: "アレルギー情報", field: "sideEffectHistory", question: "副作用歴はありますか？", type: "select", options: ["なし", "あり", "疑い"] },
-            { category: "アレルギー情報", field: "sideEffectDetails", question: "副作用の詳細（ある場合）", type: "text", hint: "薬剤名や症状を入力" },
+            { category: "アレルギー情報", field: "allergyHistory", question: "アレルギー歴", type: "select", options: ["なし", "あり", "疑い"] },
+            { category: "アレルギー情報", field: "allergyDetails", question: "アレルギーの詳細", type: "text", hint: "薬剤名や症状を入力" },
+            { category: "アレルギー情報", field: "sideEffectHistory", question: "副作用歴", type: "select", options: ["なし", "あり", "疑い"] },
+            { category: "アレルギー情報", field: "sideEffectDetails", question: "副作用の詳細", type: "text", hint: "薬剤名や症状を入力" },
             
             // 服薬管理情報
             { category: "服薬管理", field: "priorMedicationManager", question: "入院前の服薬管理者", type: "select", options: ["本人管理", "家族管理", "その他"] },
@@ -521,7 +1015,7 @@
             { category: "服薬管理", field: "dischargeDestination", question: "退院先", type: "select", options: ["当院", "他院", "自宅", "施設"] },
             
             // 入院時持参薬
-            { category: "持参薬", field: "broughtMedications", question: "入院時持参薬はありましたか？", type: "select", options: ["あり", "なし"] },
+            { category: "持参薬", field: "broughtMedications", question: "入院時持参薬", type: "select", options: ["あり", "なし"] },
             { category: "持参薬", field: "prescribingInstitution", question: "処方医療機関", type: "text", hint: "持参薬がある場合" },
             { category: "持参薬", field: "medicationInfoSource", question: "薬剤情報の確認方法", type: "checkbox", options: ["お薬手帳", "手帳アプリ", "マイナ保険証", "紹介状", "薬情"] },
             { category: "持参薬", field: "prescriptionDetails", question: "処方薬の詳細", type: "textarea", hint: "薬剤名、用法用量など" },
@@ -560,7 +1054,7 @@
             ]},
             
             // 精神科薬剤
-            { category: "精神科薬剤", field: "medicationChanges", question: "薬剤変更はありましたか？", type: "select", options: ["あり", "なし"] },
+            { category: "精神科薬剤", field: "medicationChanges", question: "薬剤変更の有無", type: "select", options: ["あり", "なし"] },
             { category: "精神科薬剤", field: "changeType1", question: "変更内容1", type: "select", options: ["開始", "増量", "減量", "中止", "変更", "なし"] },
             { category: "精神科薬剤", field: "changeDrug1", question: "変更薬剤名1", type: "text", hint: "変更があった場合" },
             { category: "精神科薬剤", field: "changeReason1", question: "変更理由1", type: "select", options: ["効果不十分", "副作用", "患者希望", "拒薬", "その他"] },
@@ -595,26 +1089,181 @@
 
         // グローバル変数
         let currentQuestionIndex = 0;
-        let answers = {};
+        let originalAnswers = {}; // CSVから読み込んだ元データ
+        let answers = {}; // 編集中のデータ
+        let changes = {}; // 変更履歴
         let timer = null;
-        let timeRemaining = 10;
+        let timeRemaining = TIMER_SECONDS;
         let isPaused = false;
+        let questionFieldMap = {};
+        let selectedPatientIndex = 0;
+        let patientsData = [];
 
-        // 基本情報フィールドの初期化（CSVで後から入力）
-        const basicFields = {
-            patientName: "※CSV入力",
-            patientId: "※CSV入力",
-            admissionDate: "※CSV入力",
-            dischargeDate: "※CSV入力",
-            gender: "※CSV入力",
-            birthDate: "※CSV入力"
-        };
+        // 初期化
+        function init() {
+            // questionFieldMapの構築
+            allQuestions.forEach(q => {
+                questionFieldMap[q.question] = q.field;
+            });
+        }
+
+        // 新規作成開始
+        function startNewEntry() {
+            // 空のデータで開始
+            originalAnswers = {};
+            answers = {};
+            changes = {};
+            
+            // 患者選択画面を表示
+            document.getElementById('initialSection').style.display = 'none';
+            document.getElementById('patientSelectionSection').style.display = 'block';
+            
+            // 新規作成の案内を表示
+            document.getElementById('selectedPatientInfo').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p style="font-size: 18px; color: #495057; margin-bottom: 15px;">
+                        <strong>新規患者データを作成します</strong>
+                    </p>
+                    <p style="color: #6c757d;">
+                        基本情報から順番に入力していきます
+                    </p>
+                </div>
+            `;
+        }
+
+        // CSVファイルの初期読み込み
+        function handleInitialFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvText = e.target.result;
+                try {
+                    parseCSVData(csvText);
+                    showPatientSelection();
+                } catch (error) {
+                    console.error("CSVファイルのパースエラー:", error);
+                    alert("CSVファイルの読み込み中にエラーが発生しました。\nファイル形式が正しいか確認してください。");
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+            document.getElementById('csvInitialUpload').value = '';
+        }
+
+        // CSVパース処理
+        function parseCSVData(csvText) {
+            // BOMの除去
+            if (csvText.charCodeAt(0) === 0xFEFF) {
+                csvText = csvText.substring(1);
+            }
+
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length <= 1) return;
+
+            // パースしてデータ構造に変換
+            const tempAnswers = {};
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line === '') continue;
+
+                // CSVパース
+                const parts = parseCSVLine(line);
+                const questionText = parts[0];
+                const answerValue = parts[1] || '';
+
+                const fieldName = questionFieldMap[questionText];
+                if (fieldName) {
+                    tempAnswers[fieldName] = answerValue;
+                }
+            }
+
+            // データを保存
+            originalAnswers = { ...tempAnswers };
+            answers = { ...tempAnswers };
+            changes = {};
+        }
+
+        // CSV行のパース
+        function parseCSVLine(line) {
+            const parts = [];
+            let inQuotes = false;
+            let start = 0;
+            
+            for (let j = 0; j < line.length; j++) {
+                if (line[j] === '"') {
+                    inQuotes = !inQuotes;
+                } else if (line[j] === ',' && !inQuotes) {
+                    parts.push(line.substring(start, j).trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+                    start = j + 1;
+                }
+            }
+            parts.push(line.substring(start).trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+            
+            return parts;
+        }
+
+        // 患者選択画面の表示
+        function showPatientSelection() {
+            document.getElementById('initialSection').style.display = 'none';
+            document.getElementById('patientSelectionSection').style.display = 'block';
+            
+            // 患者情報の表示
+            const patientInfo = document.getElementById('selectedPatientInfo');
+            let html = '<h4 style="margin-bottom: 15px; color: #333;">読み込まれた患者情報</h4>';
+            
+            // 基本情報を表示
+            const basicInfo = [
+                { field: 'patientName', label: '患者氏名' },
+                { field: 'patientId', label: '患者ID' },
+                { field: 'gender', label: '性別' },
+                { field: 'birthDate', label: '生年月日' },
+                { field: 'admissionDate', label: '入院日' },
+                { field: 'dischargeDate', label: '退院日' },
+                { field: 'doctor', label: '担当医' },
+                { field: 'pharmacist', label: '担当薬剤師' }
+            ];
+            
+            basicInfo.forEach(info => {
+                const value = answers[info.field] || '未入力';
+                html += `
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">${info.label}:</span>
+                        <span class="patient-info-value">${value}</span>
+                    </div>
+                `;
+            });
+            
+            // データ入力状況のサマリー
+            const totalQuestions = allQuestions.length;
+            const answeredQuestions = Object.keys(answers).filter(key => answers[key] && answers[key] !== '').length;
+            const completionRate = Math.round((answeredQuestions / totalQuestions) * 100);
+            
+            html += `
+                <div class="divider"></div>
+                <div style="text-align: center; padding: 15px 0;">
+                    <p style="font-size: 18px; color: #495057;">
+                        入力済み項目: <strong style="color: #28a745;">${answeredQuestions} / ${totalQuestions}</strong>
+                        <span style="margin-left: 15px;">完成度: <strong>${completionRate}%</strong></span>
+                    </p>
+                </div>
+            `;
+            
+            patientInfo.innerHTML = html;
+        }
+
+        // 最初に戻る
+        function resetToInitial() {
+            document.getElementById('patientSelectionSection').style.display = 'none';
+            document.getElementById('initialSection').style.display = 'block';
+            originalAnswers = {};
+            answers = {};
+            changes = {};
+        }
 
         // 質問開始
         function startQuestionnaire() {
-            // 基本情報の初期値設定
-            Object.assign(answers, basicFields);
-            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('questionScreen').style.display = 'block';
             showQuestion(0);
@@ -622,18 +1271,34 @@
 
         // 質問表示
         function showQuestion(index) {
-            if (index >= questions.length) {
+            if (index >= allQuestions.length) {
                 completeQuestionnaire();
                 return;
             }
 
-            const q = questions[index];
+            const q = allQuestions[index];
             currentQuestionIndex = index;
 
+            // アニメーションのリセット
+            const elements = [
+                document.getElementById('questionCategory'),
+                document.getElementById('questionText').parentElement,
+                document.getElementById('inputContainer'),
+                document.querySelector('.button-container')
+            ];
+            
+            elements.forEach(el => {
+                if (el) {
+                    el.style.animation = 'none';
+                    el.offsetHeight;
+                    el.style.animation = null;
+                }
+            });
+
             // 進捗更新
-            const progress = ((index + 1) / questions.length) * 100;
+            const progress = ((index + 1) / allQuestions.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('questionNumber').textContent = `質問 ${index + 1} / ${questions.length}`;
+            document.getElementById('questionNumber').textContent = `質問 ${index + 1} / ${allQuestions.length}`;
             document.getElementById('categoryName').textContent = q.category;
             
             // 質問表示
@@ -641,21 +1306,42 @@
             document.getElementById('questionText').textContent = q.question;
             document.getElementById('hintText').textContent = q.hint || '';
 
+            // 変更インジケーターの表示/非表示
+            const changeIndicator = document.getElementById('changeIndicator');
+            if (changes[q.field] !== undefined && originalAnswers[q.field] !== answers[q.field]) {
+                changeIndicator.style.display = 'inline-block';
+            } else {
+                changeIndicator.style.display = 'none';
+            }
+
             // 入力フィールド生成
             const inputContainer = document.getElementById('inputContainer');
             inputContainer.innerHTML = '';
+
+            // 既存の回答値を取得
+            const currentValue = answers[q.field] || '';
 
             if (q.type === 'text' || q.type === 'number' || q.type === 'date') {
                 const input = document.createElement('input');
                 input.type = q.type;
                 input.id = 'currentInput';
-                input.value = answers[q.field] || '';
+                input.value = currentValue;
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        nextQuestion();
+                    }
+                });
                 inputContainer.appendChild(input);
                 setTimeout(() => input.focus(), 100);
             } else if (q.type === 'textarea') {
                 const textarea = document.createElement('textarea');
                 textarea.id = 'currentInput';
-                textarea.value = answers[q.field] || '';
+                textarea.value = currentValue;
+                textarea.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        nextQuestion();
+                    }
+                });
                 inputContainer.appendChild(textarea);
                 setTimeout(() => textarea.focus(), 100);
             } else if (q.type === 'select') {
@@ -671,7 +1357,7 @@
                     const option = document.createElement('option');
                     option.value = opt;
                     option.textContent = opt;
-                    if (answers[q.field] === opt) {
+                    if (currentValue === opt) {
                         option.selected = true;
                     }
                     select.appendChild(option);
@@ -683,7 +1369,7 @@
                 const checkboxGroup = document.createElement('div');
                 checkboxGroup.className = 'checkbox-group';
                 
-                const currentValues = answers[q.field] ? answers[q.field].split(',') : [];
+                const currentValues = currentValue ? currentValue.split(',') : [];
                 
                 q.options.forEach((opt, i) => {
                     const item = document.createElement('div');
@@ -713,7 +1399,7 @@
 
         // タイマー開始
         function startTimer() {
-            timeRemaining = 10;
+            timeRemaining = TIMER_SECONDS;
             isPaused = false;
             updateTimerDisplay();
             
@@ -735,7 +1421,7 @@
         // タイマー表示更新
         function updateTimerDisplay() {
             document.getElementById('timerText').textContent = timeRemaining;
-            const percentage = (timeRemaining / 10) * 100;
+            const percentage = (timeRemaining / TIMER_SECONDS) * 100;
             document.getElementById('timerFill').style.width = percentage + '%';
             document.getElementById('timerFill').style.transition = isPaused ? 'none' : 'width 1s linear';
         }
@@ -780,26 +1466,52 @@
 
         // 別紙参照を設定
         function setReference() {
-            const q = questions[currentQuestionIndex];
+            const q = allQuestions[currentQuestionIndex];
+            const oldValue = answers[q.field];
             answers[q.field] = '別紙参照';
+            
+            // 変更を記録
+            if (originalAnswers[q.field] !== '別紙参照') {
+                changes[q.field] = {
+                    old: originalAnswers[q.field] || '未入力',
+                    new: '別紙参照'
+                };
+            }
+            
             clearInterval(timer);
             showQuestion(currentQuestionIndex + 1);
         }
 
         // 現在の回答を保存
         function saveCurrentAnswer() {
-            const q = questions[currentQuestionIndex];
+            const q = allQuestions[currentQuestionIndex];
+            let newValue;
             
             if (q.type === 'checkbox') {
                 const checkboxes = document.querySelectorAll('#inputContainer input[type="checkbox"]:checked');
                 const values = Array.from(checkboxes).map(cb => cb.value);
-                if (values.length > 0) {
-                    answers[q.field] = values.join(',');
-                }
+                newValue = values.join(',');
             } else {
                 const input = document.getElementById('currentInput');
-                if (input && input.value) {
-                    answers[q.field] = input.value;
+                if (input) {
+                    newValue = input.value;
+                }
+            }
+            
+            // 値が変更された場合のみ記録
+            if (newValue !== undefined) {
+                const oldValue = answers[q.field];
+                answers[q.field] = newValue;
+                
+                // 元データと異なる場合は変更を記録
+                if (originalAnswers[q.field] !== newValue) {
+                    changes[q.field] = {
+                        old: originalAnswers[q.field] || '未入力',
+                        new: newValue || '未入力'
+                    };
+                } else {
+                    // 元データと同じ値に戻った場合は変更を削除
+                    delete changes[q.field];
                 }
             }
         }
@@ -809,32 +1521,58 @@
             clearInterval(timer);
             document.getElementById('questionScreen').style.display = 'none';
             document.getElementById('completeScreen').style.display = 'block';
+            
+            // 患者情報サマリー
+            const resultInfo = document.getElementById('resultInfo');
+            const patientName = answers.patientName || '未入力';
+            const patientId = answers.patientId || '未入力';
+            
+            resultInfo.innerHTML = `
+                <strong>患者情報:</strong> ${patientName} (ID: ${patientId})<br>
+                <strong>入院日:</strong> ${answers.admissionDate || '未入力'} ～ 
+                <strong>退院日:</strong> ${answers.dischargeDate || '未入力'}
+            `;
+            
+            // 変更サマリーの表示
+            const changesList = document.getElementById('changesList');
+            if (Object.keys(changes).length > 0) {
+                let changesHtml = '';
+                for (const field in changes) {
+                    const q = allQuestions.find(q => q.field === field);
+                    if (q) {
+                        changesHtml += `
+                            <div class="change-item">
+                                <span class="change-field">${q.question}</span>
+                                <div class="change-values">
+                                    <span class="old-value">${changes[field].old}</span>
+                                    → 
+                                    <span class="new-value">${changes[field].new}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                changesList.innerHTML = changesHtml;
+                document.getElementById('changeSummary').style.display = 'block';
+            } else {
+                document.getElementById('changeSummary').style.display = 'none';
+            }
         }
 
-        // CSV作成
+        // CSV生成
         function generateCSV() {
             const headers = ['項目名', '回答'];
             const rows = [headers];
             
-            // 基本情報（CSV入力分）
-            rows.push(['患者氏名', basicFields.patientName]);
-            rows.push(['患者ID', basicFields.patientId]);
-            rows.push(['入院日', basicFields.admissionDate]);
-            rows.push(['退院日', basicFields.dischargeDate]);
-            rows.push(['性別', basicFields.gender]);
-            rows.push(['生年月日', basicFields.birthDate]);
-            
-            // その他の質問
-            questions.forEach(q => {
-                const answer = answers[q.field] || '未確認';
+            allQuestions.forEach(q => {
+                const answer = answers[q.field] || '未入力';
                 rows.push([q.question, answer]);
             });
             
-            // 日本語対応のためBOM付きUTF-8
+            // BOM付きUTF-8
             const BOM = '\uFEFF';
             const csvContent = BOM + rows.map(row => 
                 row.map(cell => {
-                    // セル内に改行、カンマ、ダブルクォートが含まれる場合の処理
                     if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))) {
                         return '"' + cell.replace(/"/g, '""') + '"';
                     }
@@ -852,7 +1590,11 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            const patientName = answers.patientName || '新規';
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `薬剤管理サマリー_${patientName}_${date}.csv`;
+            
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -863,52 +1605,74 @@
             text += '=' + '='.repeat(50) + '\n\n';
             text += `作成日時: ${new Date().toLocaleString('ja-JP')}\n\n`;
             
-            // 基本情報
-            text += '【基本情報】※CSV入力項目\n';
-            text += '-'.repeat(40) + '\n';
-            text += `患者氏名: ${basicFields.patientName}\n`;
-            text += `患者ID: ${basicFields.patientId}\n`;
-            text += `入院日: ${basicFields.admissionDate}\n`;
-            text += `退院日: ${basicFields.dischargeDate}\n`;
-            text += `性別: ${basicFields.gender}\n`;
-            text += `生年月日: ${basicFields.birthDate}\n\n`;
-            
-            // その他の質問
+            // カテゴリごとに整理
             let currentCategory = '';
-            questions.forEach(q => {
+            allQuestions.forEach(q => {
                 if (currentCategory !== q.category) {
                     currentCategory = q.category;
                     text += '\n【' + currentCategory + '】\n';
                     text += '-'.repeat(40) + '\n';
                 }
                 
-                const answer = answers[q.field] || '未確認';
-                text += `${q.question}:\n  ${answer}\n\n`;
+                let answer = answers[q.field] || '未入力';
+                
+                // 変更がある項目には印をつける
+                const prefix = changes[q.field] ? '[変更] ' : '';
+                
+                if (q.type === 'textarea' && answer && answer.includes('\n')) {
+                    answer = '\n' + answer.split('\n').map(line => '  ' + line.trim()).join('\n');
+                }
+                
+                text += `${prefix}${q.question}: ${answer}\n`;
             });
+            
+            // 変更履歴を追加
+            if (Object.keys(changes).length > 0) {
+                text += '\n\n【変更履歴】\n';
+                text += '=' + '='.repeat(25) + '\n';
+                for (const field in changes) {
+                    const q = allQuestions.find(q => q.field === field);
+                    if (q) {
+                        text += `${q.question}: ${changes[field].old} → ${changes[field].new}\n`;
+                    }
+                }
+            }
             
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `薬剤管理サマリー_${new Date().toISOString().split('T')[0]}.txt`;
+            
+            const patientName = answers.patientName || '新規';
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `薬剤管理サマリー_${patientName}_${date}.txt`;
+            
             a.click();
             URL.revokeObjectURL(url);
         }
 
-        // Enterキーで次へ
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && document.getElementById('questionScreen').style.display !== 'none') {
-                if (!isPaused) {
-                    nextQuestion();
+        // キーボードショートカット
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('questionScreen').style.display !== 'none') {
+                if (e.key === 'Escape') {
+                    pauseTimer();
+                } else if (e.key === ' ' && isPaused) {
+                    e.preventDefault();
+                    resumeTimer();
                 }
             }
         });
 
-        // ページ離脱時の警告
-        window.addEventListener('beforeunload', function(e) {
-            if (Object.keys(answers).length > Object.keys(basicFields).length && document.getElementById('completeScreen').style.display === 'none') {
+        // ページ離脱警告
+        window.addEventListener('beforeunload', function (e) {
+            if (Object.keys(answers).length > 0) {
                 e.preventDefault();
-                e.returnValue = '入力中のデータが失われます。本当にページを離れますか？';
+                e.returnValue = '';
             }
         });
+
+        // 初期化実行
+        init();
     </script>
+</body>
+</html>
